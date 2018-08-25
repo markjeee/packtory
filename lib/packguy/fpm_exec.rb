@@ -3,7 +3,7 @@ require 'bundler'
 module Packguy
   class FpmExec
     def self.fpm_exec_path
-      ENV['FPM_EXEC_PATH'] || Packer.config[:fpm_exec_path] || 'fpm'
+      Packer.config[:fpm_exec_path] || 'fpm'
     end
 
     def initialize(packager, prefix_path)

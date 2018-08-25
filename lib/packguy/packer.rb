@@ -130,11 +130,7 @@ module Packguy
     end
 
     def self.build_rpm(opts = { })
-    RpmPackage.build_package(opts)
-    end
-
-    def self.gem_build_extensions_path
-      File.expand_path('../../bin/support/gem_build_extensions', __FILE__)
+      RpmPackage.build_package(opts)
     end
 
     def self.silence_warnings
@@ -436,7 +432,7 @@ GEMFILE
     end
 
     def gather_packguy_tools_for_package(files)
-      gem_build_extensions_path = self.class.gem_build_extensions_path
+      gem_build_extensions_path = Packguy.gem_build_extensions_path
       target_tools_path = File.join(BUNDLE_PACKGUY_TOOLS_PATH)
 
       files[gem_build_extensions_path] = File.join(target_tools_path, File.basename(gem_build_extensions_path))

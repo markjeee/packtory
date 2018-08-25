@@ -8,4 +8,8 @@ module Packguy
   autoload :Packer, File.expand_path('../packguy/packer', __FILE__)
   autoload :RakeTask, File.expand_path('../packguy/rake_task', __FILE__)
   autoload :VERSION, File.expand_path('../packguy/version', __FILE__)
+
+  def self.gem_build_extensions_path
+    File.expand_path('../../bin/support/gem_build_extensions', __FILE__)
+  end
 end

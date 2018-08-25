@@ -1,0 +1,17 @@
+PATH
+  remote: .
+  specs:
+    custom1_gem (0.1)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  custom1_gem!
+
+BUNDLED WITH
+   1.16.2
