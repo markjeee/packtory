@@ -1,4 +1,6 @@
 language: ruby
-rvm:
-  - 1.9.3
-  - 2.5.1
+matrix:
+  include:
+    - rvm: 2.5.1
+    - rvm: 1.9.3
+      gemfile: spec/gemfiles/Gemfile.19
