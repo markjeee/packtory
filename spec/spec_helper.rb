@@ -128,6 +128,8 @@ module PackguySpec
   end
 
   def self.pack(build_path, env_vars = { }, opts = { })
+    env_vars['FPM_EXEC_PATH'] = `bundle exec which fpm`.strip
+
     env_vars = env_vars.inject([]) { |a, (k,v)| a << '%s=%s' % [ k, v ]; a }.join(' ')
 
     cmd = 'env %s %s %s %s' %

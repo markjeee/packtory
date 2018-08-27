@@ -16,6 +16,8 @@ Gem::Specification.new do |s|
                         Dir.glob('bin/**/*') +
                         Dir.glob('lib/**/*')
 
+  s.add_dependency    'bundler'
+
   s.description = <<DESCRIPTION
 A packguy
 DESCRIPTION
