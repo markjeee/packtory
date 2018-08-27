@@ -2,6 +2,7 @@ source 'https://rubygems.org'
 
 gemspec :path => '../../'
 
+gem 'rake', '~> 12.2.0'
 gem 'bundler'
 
 group :development, :test do
