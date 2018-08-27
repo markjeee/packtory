@@ -7,12 +7,7 @@ module Packguy
     def detect_envs(argv)
       if ENV['FPM_EXEC_PATH']
         @fpm_exec_path = File.expand_path(ENV['FPM_EXEC_PATH'])
-        unless File.exists?(@fpm_exec_path)
-          @fpm_exec_path = nil
-        end
-      end
-
-      if @fpm_exec_path.nil?
+      else
         @fpm_exec_path = `which fpm`.strip
       end
 

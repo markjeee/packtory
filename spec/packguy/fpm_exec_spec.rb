@@ -14,6 +14,8 @@ describe 'Packguy fpm exec' do
     end
 
     it 'should perform build' do
+      skip 'Faulty, due to Bundler use when packing messes up the Bundler env of test runtime'
+
       package_filename = '%s_%s_%s.deb' % [ @packguy.package_name, @packguy.version, @packguy.architecture ]
       pkg_file_path = @fpm_exec.build(@sfiles_map, package_filename, type: :deb)
 

@@ -3,7 +3,13 @@ require 'bundler'
 module Packguy
   class FpmExec
     def self.fpm_exec_path
-      Packer.config[:fpm_exec_path] || 'fpm'
+      if !Packer.config[:fpm_exec_path].nil? && !Packer.config[:fpm_exec_path].empty?
+        Packer.config[:fpm_exec_path]
+      else
+        fep = `which fpm`.strip
+        fep = 'fpm' if fep.empty?
+        fep
+      end
     end
 
     def initialize(packager, prefix_path)
