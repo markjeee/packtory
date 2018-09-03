@@ -120,6 +120,24 @@ module Packguy
       self
     end
 
+    def detect_package_output(argv)
+      packages = [ ]
+
+      if ENV['PACKAGE_OUTPUT'] == 'rpm'
+        packages << :rpm
+      elsif ENV['PACKAGE_OUTPUT'] == 'deb'
+        packages << :deb
+      else
+        # Debian is the default output
+        packages << :deb
+      end
+
+      puts 'Package output   : %s' % packages.join(', ')
+      Packer.config[:packages] = packages
+
+      self
+    end
+
     def run(argv)
       detect_envs(argv)
 
@@ -129,11 +147,9 @@ module Packguy
       detect_specfile(argv)
       detect_gemfile(argv)
       detect_deps(argv)
+      detect_package_output(argv)
 
       puts '=================='
-
-      # For now, only Debian package building is supported
-      Packer.config[:packages] = [ :deb ]
 
       Packer.setup
       unless ENV['TEST_NOBUILD']

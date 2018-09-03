@@ -10,6 +10,7 @@ describe 'Packguy binary' do
       success = PackguySpec.pack(@build_path,
                                  { 'TEST_NOBUILD' => 1 },
                                  no_stdout: true)
+
       expect(success).to eq(true)
     end
 
@@ -18,6 +19,7 @@ describe 'Packguy binary' do
                                  { 'TEST_NOBUILD' => 1,
                                    'GEM_SPECFILE' => 'gemspecs/another.gemspec' },
                                  no_stdout: true)
+
       expect(success).to eq(true)
     end
 
@@ -26,6 +28,7 @@ describe 'Packguy binary' do
                                  { 'TEST_NOBUILD' => 1,
                                    'GEM_SPECFILE' => 'gemspecs/donotexist.gemspec' },
                                  no_stdout: true)
+
       expect(success).to eq(false)
     end
   end

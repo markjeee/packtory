@@ -13,7 +13,7 @@ describe 'Packguy fpm exec' do
       @fpm_exec = Packguy::FpmExec.new(@packguy, prefix_path)
     end
 
-    it 'should perform build' do
+    it 'should perform debian build' do
       skip 'Faulty, due to Bundler use when packing messes up the Bundler env of test runtime'
 
       package_filename = '%s_%s_%s.deb' % [ @packguy.package_name, @packguy.version, @packguy.architecture ]
@@ -22,12 +22,29 @@ describe 'Packguy fpm exec' do
       expect(File.exists?(pkg_file_path)).to be_truthy
     end
 
-    it 'should build cmd' do
+    it 'should build cmd for debian' do
       package_filename = '%s_%s_%s.deb' % [ @packguy.package_name, @packguy.version, @packguy.architecture ]
       pkg_file = File.join(@packguy.pkg_path, package_filename)
 
       cmd = @fpm_exec.build_cmd(@sfiles_map, pkg_file, type: :deb)
       expect(cmd).to include('-t deb')
+    end
+
+    it 'should perform rpm build' do
+      skip 'Faulty, due to Bundler use when packing messes up the Bundler env of test runtime'
+
+      package_filename = '%s_%s_%s.rpm' % [ @packguy.package_name, @packguy.version, @packguy.architecture ]
+      pkg_file_path = @fpm_exec.build(@sfiles_map, package_filename, type: :rpm)
+
+      expect(File.exists?(pkg_file_path)).to be_truthy
+    end
+
+    it 'should build cmd for rpm' do
+      package_filename = '%s_%s_%s.rpm' % [ @packguy.package_name, @packguy.version, @packguy.architecture ]
+      pkg_file = File.join(@packguy.pkg_path, package_filename)
+
+      cmd = @fpm_exec.build_cmd(@sfiles_map, pkg_file, type: :rpm)
+      expect(cmd).to include('-t rpm')
     end
 
     it 'should specify dependencies' do
