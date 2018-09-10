@@ -26,7 +26,7 @@ module PackguySpec
     end
 
     def self.stream_download(gem_name, url)
-      u = URI.parse(url)
+      url = URI.parse(url)
 
       dest_file = PackguySpec.spec_gem_archive_path(gem_name)
       unless File.exists?(dest_file)
@@ -41,7 +41,7 @@ module PackguySpec
       pkg_file_path = find_built_package(gem_name, file_match)
       if pkg_file_path.nil?
         check_and_download_gems_for_spec(gem_name)
-        PackguySpec.compile_with_gems(gem_name)
+        PackguySpec.pack_with_gems(gem_name)
 
         pkg_file_path = find_built_package(gem_name, file_match)
       end

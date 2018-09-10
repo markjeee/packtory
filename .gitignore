@@ -1,3 +1,5 @@
 /spec/valid_build/tmp_packguy_wp
 /tmp/packguy_spec/
 /tmp/packguy_wp/
+/pkg
+/spec/valid_build/pkg/
