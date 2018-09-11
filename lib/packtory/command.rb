@@ -1,4 +1,4 @@
-module Packguy
+module Packtory
   class Command
     def self.run(argv)
       self.new.run(argv)

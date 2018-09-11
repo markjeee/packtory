@@ -1,14 +1,14 @@
 require 'fileutils'
 require 'bundler'
 
-module Packguy
+module Packtory
   class Packer
     BUNDLE_TARGET_PATH = 'bundle'
     BUNDLE_EXTENSIONS_PATH = 'extensions'
-    BUNDLE_PACKGUY_TOOLS_PATH = 'packguy_tools'
+    BUNDLE_PACKTORY_TOOLS_PATH = 'packtory_tools'
     BUNDLE_BUNDLER_SETUP_FILE = 'bundler/setup.rb'
 
-    PACKGUY_PACKFILE = 'Packfile'
+    PACKTORY_PACKFILE = 'Packfile'
 
     DEFAULT_CONFIG = {
       :path => nil,
@@ -49,14 +49,14 @@ module Packguy
     end
 
     def self.setup_defaults
-      if ENV.include?('PACKGUY_PACKAGES') && !ENV['PACKGUY_PACKAGES'].empty?
-        config[:packages] = ENV['PACKGUY_PACKAGES'].split(',').collect { |p| p.to_sym }
+      if ENV.include?('PACKTORY_PACKAGES') && !ENV['PACKTORY_PACKAGES'].empty?
+        config[:packages] = ENV['PACKTORY_PACKAGES'].split(',').collect { |p| p.to_sym }
       elsif config[:packages].nil?
         config[:packages] = DEFAULT_PACKAGES
       end
 
-      if ENV.include?('PACKGUY_BUNDLE_WORKING_PATH')
-        config[:bundle_working_path] = File.expand_path(ENV['PACKGUY_BUNDLE_WORKING_PATH'])
+      if ENV.include?('PACKTORY_BUNDLE_WORKING_PATH')
+        config[:bundle_working_path] = File.expand_path(ENV['PACKTORY_BUNDLE_WORKING_PATH'])
       end
 
       unless config[:dependencies].include?('ruby')
@@ -67,10 +67,10 @@ module Packguy
     def self.load_packfile
       packfile_path = nil
 
-      if ENV.include?('PACKGUY_PACKFILE')
-        packfile_path = File.expand_path(ENV['PACKGUY_PACKFILE'])
+      if ENV.include?('PACKTORY_PACKFILE')
+        packfile_path = File.expand_path(ENV['PACKTORY_PACKFILE'])
       else
-        packfile_path = search_up(PACKGUY_PACKFILE)
+        packfile_path = search_up(PACKTORY_PACKFILE)
       end
 
       unless packfile_path.nil?
@@ -285,7 +285,7 @@ GEMFILE
 
     def working_path
       if @opts[:working_path].nil?
-        File.join(root_path, 'tmp/packguy_wp')
+        File.join(root_path, 'tmp/packtory_wp')
       else
         @opts[:working_path]
       end
@@ -407,7 +407,7 @@ GEMFILE
         end
       end
 
-      include_packguy_tools = false
+      include_packtory_tools = false
 
       bgems = bundle_gems
       bgems.each do |gem_name, bhash|
@@ -418,22 +418,22 @@ GEMFILE
 
         unless bhash[:spec].extensions.empty?
           add_ruby_build_dependencies!
-          include_packguy_tools = true
+          include_packtory_tools = true
 
           files[bhash[:orig_spec].loaded_from] = File.join(BUNDLE_EXTENSIONS_PATH, '%s.gemspec' % gem_name)
         end
       end
 
-      if include_packguy_tools
-        files = gather_packguy_tools_for_package(files)
+      if include_packtory_tools
+        files = gather_packtory_tools_for_package(files)
       end
 
       files
     end
 
-    def gather_packguy_tools_for_package(files)
-      gem_build_extensions_path = Packguy.gem_build_extensions_path
-      target_tools_path = File.join(BUNDLE_PACKGUY_TOOLS_PATH)
+    def gather_packtory_tools_for_package(files)
+      gem_build_extensions_path = Packtory.gem_build_extensions_path
+      target_tools_path = File.join(BUNDLE_PACKTORY_TOOLS_PATH)
 
       files[gem_build_extensions_path] = File.join(target_tools_path, File.basename(gem_build_extensions_path))
 

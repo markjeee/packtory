@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    packguy (0.1.0)
+    packtory (0.1.0)
       bundler
 
 GEM
@@ -68,7 +68,7 @@ DEPENDENCIES
   bundler
   docker_task (~> 0.1.4)!
   fpm
-  packguy!
+  packtory!
   rspec
 
 BUNDLED WITH

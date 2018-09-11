@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
 $:.unshift File.expand_path('../../lib', __FILE__)
-require 'packguy'
+require 'packtory'
 
-Packguy::Command.run(ARGV)
+Packtory::Command.run(ARGV)

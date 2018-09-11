@@ -1,7 +1,7 @@
 require 'bundler/resolver/spec_group'
 require 'bundler/installer'
 
-module Packguy
+module Packtory
   module PatchBundlerNoMetadataDeps
     def self.patch!
       Bundler::Resolver::SpecGroup.class_eval do

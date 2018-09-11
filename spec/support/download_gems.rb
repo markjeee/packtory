@@ -1,12 +1,12 @@
 require 'uri'
 require 'fileutils'
 
-module PackguySpec
+module PacktorySpec
   module DownloadGems
     def self.check_and_download_gems_for_spec(only = nil)
-      PackguySpec.prepare_spec_gems_path
+      PacktorySpec.prepare_spec_gems_path
 
-      spec_gems = PackguySpec.spec_gems
+      spec_gems = PacktorySpec.spec_gems
       unless only.nil?
         spec_gems = spec_gems.select { |k,v| k == only }
       end
@@ -14,7 +14,7 @@ module PackguySpec
       spec_gems.each do |gem_name, gem_source|
         gem_file_path = stream_download(gem_name, gem_source)
 
-        extract_path = PackguySpec.spec_gem_extract_path(gem_name)
+        extract_path = PacktorySpec.spec_gem_extract_path(gem_name)
         unless File.exists?(extract_path)
           FileUtils.rm_rf(extract_path)
           FileUtils.mkpath(extract_path)
@@ -28,7 +28,7 @@ module PackguySpec
     def self.stream_download(gem_name, url)
       url = URI.parse(url)
 
-      dest_file = PackguySpec.spec_gem_archive_path(gem_name)
+      dest_file = PacktorySpec.spec_gem_archive_path(gem_name)
       unless File.exists?(dest_file)
         cmd = 'curl -sLo %s %s' % [ dest_file, url ]
         system(cmd)
@@ -41,7 +41,7 @@ module PackguySpec
       pkg_file_path = find_built_package(gem_name, file_match)
       if pkg_file_path.nil?
         check_and_download_gems_for_spec(gem_name)
-        PackguySpec.pack_with_gems(gem_name)
+        PacktorySpec.pack_with_gems(gem_name)
 
         pkg_file_path = find_built_package(gem_name, file_match)
       end
@@ -50,7 +50,7 @@ module PackguySpec
     end
 
     def self.find_built_package(gem_name, file_match = '*.deb')
-      extract_path = PackguySpec.spec_gem_extract_path(gem_name)
+      extract_path = PacktorySpec.spec_gem_extract_path(gem_name)
       pkg_path = File.join(extract_path, 'pkg')
 
       packages = Dir.glob(File.join(pkg_path, file_match))

@@ -3,9 +3,10 @@ require 'bundler'
 Bundler.setup
 $:.unshift File.expand_path('../lib', __FILE__)
 
+require 'bundler/gem_tasks'
 require 'rspec/core/rake_task'
 require 'docker_task'
-require 'packguy'
+require 'packtory'
 
 RSpec::Core::RakeTask.new('spec')
 task :default => :spec
@@ -24,13 +25,13 @@ end
 
 DockerTask.create({ :remote_repo => 'ruby',
                     :pull_tag => '2.5.1',
-                    :image_name => 'packguy.ruby251',
+                    :image_name => 'packtory.ruby251',
                     :run => docker_run })
 
-DockerTask.include_tasks(:use => 'packguy.ruby251')
+DockerTask.include_tasks(:use => 'packtory.ruby251')
 
 desc 'Bash to ruby251 environment'
 task :bash_to_ruby251 do
-  c = DockerTask.containers['packguy.ruby251']
+  c = DockerTask.containers['packtory.ruby251']
   c.runi
 end

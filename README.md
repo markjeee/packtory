@@ -1,6 +1,6 @@
 ## Overview
 
-This is packguy, an integrated, easy to use packaging tool for your
+This is packtory, an integrated, easy to use packaging tool for your
 Ruby gem, Node module, and Python module.
 
 ## State

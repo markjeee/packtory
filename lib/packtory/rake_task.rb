@@ -1,4 +1,4 @@
-module Packguy
+module Packtory
   class RakeTask < ::Rake::TaskLib
     def self.install_tasks
       new.define_tasks
@@ -96,7 +96,7 @@ module Packguy
       packager = Packer.new
       sfiles_map = packager.prepare_files(prefix_path)
 
-      ENV['PACKGUY_WORKING_PATH'] = packager.working_path
+      ENV['PACKTORY_WORKING_PATH'] = packager.working_path
       Rake::Task['spec'].execute
     end
 

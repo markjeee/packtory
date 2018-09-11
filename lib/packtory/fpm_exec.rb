@@ -1,6 +1,6 @@
 require 'bundler'
 
-module Packguy
+module Packtory
   class FpmExec
     def self.fpm_exec_path
       if !Packer.config[:fpm_exec_path].nil? && !Packer.config[:fpm_exec_path].empty?
