@@ -24,7 +24,12 @@ module Packtory
       cmd = build_cmd(sfiles_map, pkg_file, opts)
 
       Bundler.ui.info 'CMD: %s' % cmd
-      Bundler.clean_system('%s >/dev/null 2>&1' % cmd)
+
+      if Packer.config[:fpm_exec_verbose]
+        Bundler.clean_system('%s' % cmd)
+      else
+        Bundler.clean_system('%s >/dev/null 2>&1' % cmd)
+      end
 
       pkg_file
     end

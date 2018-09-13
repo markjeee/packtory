@@ -35,6 +35,10 @@ module Packtory
       Packer.config[:fpm_exec_path] = @fpm_exec_path
       Packer.config[:path] = @build_path
 
+      if ENV['FPM_EXEC_VERBOSE'] && ENV['FPM_EXEC_VERBOSE'] == '1'
+        Packer.config[:fpm_exec_verbose] = true
+      end
+
       self
     end
 
