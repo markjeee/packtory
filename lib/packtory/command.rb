@@ -39,6 +39,11 @@ module Packtory
         Packer.config[:fpm_exec_verbose] = true
       end
 
+      if !ENV['FPM_EXEC_LOG'].nil? && !ENV['FPM_EXEC_LOG'].empty?
+        Packer.config[:fpm_exec_verbose] = true
+        Packer.config[:fpm_exec_log] = ENV['FPM_EXEC_LOG']
+      end
+
       self
     end
 

@@ -27,6 +27,8 @@ module Packtory
 
       :fpm_exec_path => nil,
       :fpm_exec_verbose => false,
+      :fpm_exec_log => nil,
+
       :bundler_silent => false,
       :bundler_local => false
     }

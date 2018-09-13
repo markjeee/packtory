@@ -35,7 +35,7 @@ module Packtory
     end
 
     def build_cmd(sfiles_map, pkg_file, opts = { })
-      cmd = '%s --log warn -f -s dir' % self.class.fpm_exec_path
+      cmd = '%s --log %s -f -s dir' % [ self.class.fpm_exec_path, Packer.config[:fpm_exec_log] || 'warn' ]
 
       case opts[:type]
       when :rpm
