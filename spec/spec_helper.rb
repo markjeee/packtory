@@ -1,5 +1,6 @@
 require 'bundler'
 require 'fileutils'
+require 'yaml'
 
 ENV['BUNDLE_GEMFILE'] = File.expand_path('../../Gemfile', __FILE__)
 Bundler.setup
@@ -24,6 +25,7 @@ end
 module PacktorySpec
   TMP_SPEC_GEMS = File.expand_path('../../tmp/packtory_spec/gems', __FILE__)
   TMP_SPEC_BUNDLE_WORKING_PATH = File.expand_path('../../tmp/packtory_spec/bundle', __FILE__)
+  TMP_SPEC_PACKAGE_PATH = File.expand_path('../../tmp/packtory_spec/pkg', __FILE__)
 
   VALID_BUILD_PATH = File.expand_path('../valid_build', __FILE__)
   VENDOR_CACHE = File.expand_path('../vendor_cache', __FILE__)
@@ -51,6 +53,10 @@ module PacktorySpec
 
   def self.spec_bundle_working_path
     TMP_SPEC_BUNDLE_WORKING_PATH
+  end
+
+  def self.spec_pkg_path
+    TMP_SPEC_PACKAGE_PATH
   end
 
   def self.prepare_spec_gems_path
@@ -85,6 +91,20 @@ module PacktorySpec
     copy_vendor_cache(Packtory::Packer.config[:working_path])
 
     Packtory
+  end
+
+  def self.packtory_pack(config = { })
+    FileUtils.rm_f('%s/*' % spec_pkg_path)
+
+    package_output = config[:package_output] || 'deb'
+    cmd = 'env PACKAGE_PATH=%s PACKAGE_OUTPUT=%s BUNDLE_GEMFILE=%s BUNDLER_INCLUDE=1 bin/packtory %s >/dev/null 2>&1' %
+          [ spec_pkg_path,
+            package_output,
+            File.expand_path('../../Gemfile.system', __FILE__),
+            File.expand_path('../../', __FILE__) ]
+
+    Bundler.clean_system(cmd)
+    Dir.glob('%s/*.%s' % [ spec_pkg_path, package_output ]).first
   end
 
   def self.define_docker_containers

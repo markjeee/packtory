@@ -16,4 +16,8 @@ module Packtory
   def self.gem_build_extensions_path
     File.expand_path('../../bin/support/gem_build_extensions', __FILE__)
   end
+
+  def self.bin_support_fpm_path
+    File.expand_path('../../bin/support/fpm', __FILE__)
+  end
 end

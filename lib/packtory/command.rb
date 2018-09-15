@@ -1,3 +1,5 @@
+require 'yaml'
+
 module Packtory
   class Command
     def self.run(argv)
@@ -8,22 +10,22 @@ module Packtory
       if ENV['FPM_EXEC_PATH']
         @fpm_exec_path = File.expand_path(ENV['FPM_EXEC_PATH'])
       else
-        @fpm_exec_path = `which fpm`.strip
+        @fpm_exec_path = Packtory.bin_support_fpm_path
       end
 
       if @fpm_exec_path.nil? || @fpm_exec_path.empty?
-        puts 'ERROR: `fpm` executable is not in path. Perhaps, install fpm first?'
+        say 'ERROR: `fpm` executable is not in path. Perhaps, install fpm first?'
         exit 1
       end
 
       if argv[0].nil? || argv[0].empty?
-        puts 'ERROR: Build path not specified, aborting.'
+        say 'ERROR: Build path not specified, aborting.'
         exit 1
       end
 
       @build_path = File.expand_path(argv[0])
       unless File.exists?(@build_path)
-        puts 'ERROR: Build path %s do not exist, aborting.' % @build_path
+        say 'ERROR: Build path %s do not exist, aborting.' % @build_path
         exit 1
       end
 
@@ -55,16 +57,16 @@ module Packtory
         end
 
         unless File.exists?(@gemspec_file)
-          puts 'ERROR: Specified gemspec file %s not found, aborting.' % @gemspec_file
+          say 'ERROR: Specified gemspec file %s not found, aborting.' % @gemspec_file
           exit 1
         end
       else
         paths = Dir.glob(File.join(@build_path, '/*.gemspec'))
         if paths.empty?
-          puts 'ERROR: No gemspec file found, aborting.'
+          say 'ERROR: No gemspec file found, aborting.'
           exit 1
         elsif paths.count > 1
-          puts 'ERROR: Multiple gemspec file found, aborting.'
+          say 'ERROR: Multiple gemspec file found, aborting.'
           exit 1
         end
 
@@ -88,12 +90,16 @@ module Packtory
         end
 
         unless File.exists?(@bundle_gemfile)
-          puts 'ERROR: Specified bundle gemfile %s not found, aborting.' % @bundle_gemfile
+          say 'ERROR: Specified bundle gemfile %s not found, aborting.' % @bundle_gemfile
           exit 1
         end
 
-        puts 'Using Gemfile    : %s' % @bundle_gemfile
+        say 'Using Gemfile    : %s' % @bundle_gemfile
         Packer.config[:gemfile] = @bundle_gemfile
+      end
+
+      if ENV['BUNDLER_INCLUDE']
+        Packer.config[:bundler_include] = true
       end
 
       self
@@ -104,10 +110,10 @@ module Packtory
 
       if ENV['PACKAGE_RUBY_VERSION'] && !ENV['PACKAGE_RUBY_VERSION'].empty?
         @ruby_version = ENV['PACKAGE_RUBY_VERSION']
-        puts 'Using ruby deps  : %s' % @ruby_version
+        say 'Using ruby deps  : %s' % @ruby_version
       else
         @ruby_version = nil
-        puts 'Using ruby deps  : latest'
+        say 'Using ruby deps  : latest'
       end
 
       Packer.config[:dependencies]['ruby'] = @ruby_version
@@ -141,8 +147,33 @@ module Packtory
         packages << :deb
       end
 
-      puts 'Package output   : %s' % packages.join(', ')
+      say 'Package output   : %s' % packages.join(', ')
       Packer.config[:packages] = packages
+
+      if ENV['PACKAGE_PATH']
+        pkg_path = File.expand_path(ENV['PACKAGE_PATH'])
+
+        say 'Package path     : %s' % pkg_path
+        Packer.config[:pkg_path] = pkg_path
+      end
+
+      self
+    end
+
+    def test_dumpinfo(argv)
+      dump_file = File.expand_path(ENV['TEST_DUMPINFO'])
+
+      info_h = {
+        :version => ::Packtory::VERSION,
+        :fpm_version => `#{@fpm_exec_path} -v`.strip
+      }.merge(Packer.config)
+
+      File.open(dump_file, 'w') do |f|
+        f.write(YAML.dump(info_h))
+      end
+
+      say 'Created dump file: %s' % dump_file
+      say File.read(dump_file)
 
       self
     end
@@ -158,10 +189,15 @@ module Packtory
       detect_deps(argv)
       detect_package_output(argv)
 
-      puts '=================='
+      say '=================='
 
       Packer.setup
-      unless ENV['TEST_NOBUILD']
+
+      if ENV['TEST_DUMPINFO']
+        test_dumpinfo(argv)
+      elsif ENV['TEST_NOBUILD']
+        # do nothing
+      else
         Packer.build_package
       end
     end

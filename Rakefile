@@ -35,3 +35,20 @@ task :bash_to_ruby251 do
   c = DockerTask.containers['packtory.ruby251']
   c.runi
 end
+
+desc 'Craete a Debian package'
+task :pack_deb do
+  cmd = 'env PACKAGE_OUTPUT=%s BUNDLE_GEMFILE=%s BUNDLER_INCLUDE=1 bin/packtory %s' %
+        [ ENV['PACK_PACKAGE_OUTPUT'] || 'deb',
+          File.expand_path('../Gemfile.system', __FILE__),
+          File.expand_path('../', __FILE__) ]
+
+  puts cmd
+  Bundler.clean_system(cmd)
+end
+
+desc 'Create an RPM package'
+task :pack_rpm do
+  ENV['PACK_PACKAGE_OUTPUT'] = 'rpm'
+  Rake::Task['pack_deb'].invoke
+end

@@ -6,9 +6,7 @@ module Packtory
       if !Packer.config[:fpm_exec_path].nil? && !Packer.config[:fpm_exec_path].empty?
         Packer.config[:fpm_exec_path]
       else
-        fep = `which fpm`.strip
-        fep = 'fpm' if fep.empty?
-        fep
+        Packtory.bin_support_fpm_path
       end
     end
 

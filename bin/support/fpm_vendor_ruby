@@ -1,0 +1,9 @@
+#!/usr/bin/env ruby
+
+bundle_path = ENV['PACKTORY_BUNDLE_PATH']
+require File.join(bundle_path, 'bundler/setup.rb')
+
+require 'fpm'
+require 'fpm/command'
+
+exit(FPM::Command.run || 0)

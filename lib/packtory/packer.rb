@@ -12,6 +12,7 @@ module Packtory
 
     DEFAULT_CONFIG = {
       :path => nil,
+      :pkg_path => nil,
       :gemspec => nil,
       :gemfile => nil,
       :binstub =>  nil,
@@ -30,7 +31,8 @@ module Packtory
       :fpm_exec_log => nil,
 
       :bundler_silent => false,
-      :bundler_local => false
+      :bundler_local => false,
+      :bundler_include => false
     }
 
     DEFAULT_PACKAGES = [ :deb, :rpm ]
@@ -233,10 +235,24 @@ module Packtory
         rubygems_dir = Bundler.rubygems.gem_dir
         FileUtils.mkpath(File.join(rubygems_dir, 'specifications'))
 
+        cached_gems = { }
         @bundle_def.specs.each do |spec|
           next unless spec.source.is_a?(Bundler::Source::Rubygems)
+          cached_gems[spec.name] = spec.source.send(:cached_gem, spec)
+        end
 
-          cached_gem = spec.source.send(:cached_gem, spec)
+        if @opts[:bundler_include]
+          bundler_source = Bundler::Source::Rubygems.new('remotes' => 'https://rubygems.org')
+          @bundler_spec = Bundler::RemoteSpecification.
+                           new('bundler', Bundler::VERSION,
+                               Gem::Platform::RUBY, bundler_source.fetchers.first)
+          @bundler_spec.remote = Bundler::Source::Rubygems::Remote.new(bundler_source.remotes.first)
+
+          bundler_source.send(:fetch_gem, @bundler_spec)
+          cached_gems['bundler'] = bundler_source.send(:cached_gem, @bundler_spec)
+        end
+
+        cached_gems.each do |gem_name, cached_gem|
           installer = Gem::Installer.at(cached_gem, :path => rubygems_dir)
           installer.extract_files
           installer.write_spec
@@ -283,7 +299,11 @@ GEMFILE
     end
 
     def pkg_path
-      File.join(root_path, 'pkg')
+      if @opts[:pkg_path].nil?
+        File.join(root_path, 'pkg')
+      else
+        @opts[:pkg_path]
+      end
     end
 
     def working_path
@@ -350,42 +370,50 @@ GEMFILE
       specs = bundler_definition.specs_for([ :default ])
 
       specs.each do |spec|
-        if spec.name != 'bundler' && (gemspec.nil? || spec.name != gemspec.name)
-          orig_spec = spec
-          if spec.is_a?(Bundler::EndpointSpecification)
-            rs = spec.instance_variable_get(:@remote_specification)
-            if rs
-              spec = rs
-            elsif spec._local_specification
-              spec = spec._local_specification
-            end
+        next if gemspec.nil? || spec.name == gemspec.name
+
+        if spec.name == 'bundler'
+          if @opts[:bundler_include]
+            spec = @bundler_spec
+          else
+            next
+          end
+        end
+
+        orig_spec = spec
+        if spec.is_a?(Bundler::EndpointSpecification)
+          rs = spec.instance_variable_get(:@remote_specification)
+          if rs
+            spec = rs
+          elsif spec._local_specification
+            spec = spec._local_specification
+          end
+        end
+
+        bhash = { }
+
+        bhash[:orig_spec] = orig_spec
+        bhash[:spec] = spec
+        bhash[:gem_path] = spec.full_gem_path
+
+        bhash[:files] = Dir.glob(File.join(spec.full_gem_path, '**/*')).inject([ ]) { |a, f|
+          unless File.directory?(f)
+            a << f.gsub('%s/' % spec.full_gem_path, '')
           end
 
-          bhash = { }
+          a
+        }.uniq
 
-          bhash[:orig_spec] = orig_spec
-          bhash[:spec] = spec
-          bhash[:gem_path] = spec.full_gem_path
+        bhash[:require_paths] = spec.full_require_paths.collect { |path|
+          path.include?(bhash[:gem_path]) ?
+            path.gsub(bhash[:gem_path], '') : nil
+        }.compact.uniq
 
-          bhash[:files] = Dir.glob(File.join(spec.full_gem_path, '**/*')).inject([ ]) { |a, f|
-            unless File.directory?(f)
-              a << f.gsub('%s/' % spec.full_gem_path, '')
-            end
-
-            a
-          }.uniq
-
-          bhash[:require_paths] = spec.full_require_paths.collect { |path|
-            path.include?(bhash[:gem_path]) ?
-              path.gsub(bhash[:gem_path], '') : nil
-          }.compact
-
-          bgems[spec.name] = bhash
-        end
+        bgems[spec.name] = bhash
       end
 
       bgems
-  end
+    end
 
     def add_ruby_build_dependencies!
       unless @opts[:dependencies].include?('ruby-dev')
