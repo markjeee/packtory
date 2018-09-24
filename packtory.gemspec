@@ -5,7 +5,7 @@ Gem::Specification.new do |s|
   s.name              = 'packtory'
   s.date              = Time.now.strftime('%Y-%m-%d')
   s.version           = ENV['BUILD_VERSION'] || Packtory::VERSION
-  s.summary           = 'A packtory'
+  s.summary           = 'An easy to use system packaging tool for your Ruby gems.'
   s.homepage          = 'https://gemfury.com'
   s.email             = 'hello@gemfury.com'
   s.authors           = [ "Mark John Buenconsejo" ]
@@ -17,9 +17,12 @@ Gem::Specification.new do |s|
                         Dir.glob('lib/**/*')
 
   s.add_dependency    'bundler'
+  s.add_dependency    'fpm'
 
   s.description = <<DESCRIPTION
-A packtory
+An easy to use system packaging tool for your Ruby
+gems. Build package for Debian, RPM, and _soon_ Homebrew, directly
+from your gem repo.
 DESCRIPTION
 
   s.post_install_message =<<POSTINSTALL

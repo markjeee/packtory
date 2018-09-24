@@ -1,8 +1,9 @@
 PATH
   remote: .
   specs:
-    packtory (0.1.0)
+    packtory (0.1.1)
       bundler
+      fpm
 
 GEM
   remote: https://rubygems.org/

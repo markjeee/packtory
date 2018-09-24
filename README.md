@@ -1,6 +1,8 @@
 # Overview
 
-This is packtory, an easy to use packaging tool for your Ruby gems.
+This is packtory, an easy to use system packaging tool for your Ruby
+gems. Build package for Debian, RPM, and _soon_ Homebrew, directly
+from your gem repo.
 
 Support for building native extensions is available, using a post-install step of the target package.
 
