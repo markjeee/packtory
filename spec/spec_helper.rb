@@ -73,6 +73,7 @@ module PacktorySpec
 
   def self.copy_vendor_cache(working_path)
     target_vc_path = Pathname.new(working_path).join('vendor/cache')
+
     unless target_vc_path.exist?
       FileUtils.mkpath(target_vc_path)
       FileUtils.cp_r(Dir.glob('%s/*' % VENDOR_CACHE), target_vc_path)
@@ -82,13 +83,18 @@ module PacktorySpec
   end
 
   def self.packtory_setup(config = { })
-    Packtory::Packer.config.merge!({ :path => VALID_BUILD_PATH,
-                                    :working_path => File.join(VALID_BUILD_PATH, 'tmp_packtory_wp'),
-                                    :bundler_silent => true,
-                                    :bundler_local => true
-                                  }.merge(config))
-    Packtory::Packer.setup
-    copy_vendor_cache(Packtory::Packer.config[:working_path])
+    packtory_wp = File.join(VALID_BUILD_PATH, 'tmp_packtory_wp')
+    FileUtils.rm_f(packtory_wp)
+
+    Packtory::Config.reset_config!
+    Packtory.config.merge!({ :path => VALID_BUILD_PATH,
+                             :working_path => packtory_wp,
+                             :bundler_silent => true,
+                             :bundler_local => true
+                           }.merge(config))
+
+    Packtory.setup
+    copy_vendor_cache(Packtory.config[:working_path])
 
     Packtory
   end

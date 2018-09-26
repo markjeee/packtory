@@ -8,135 +8,7 @@ module Packtory
     BUNDLE_PACKTORY_TOOLS_PATH = 'packtory_tools'
     BUNDLE_BUNDLER_SETUP_FILE = 'bundler/setup.rb'
 
-    PACKTORY_PACKFILE = 'Packfile'
-
-    DEFAULT_CONFIG = {
-      :path => nil,
-      :pkg_path => nil,
-      :gemspec => nil,
-      :gemfile => nil,
-      :binstub =>  nil,
-      :packages => nil,
-      :architecture => 'all',
-
-      # maybe specified, if wanting to override as set in gemspec file
-      :package_name => nil,
-      :working_path => nil,
-
-      :dependencies => { },
-      :bundle_working_path => nil,
-
-      :fpm_exec_path => nil,
-      :fpm_exec_verbose => false,
-      :fpm_exec_log => nil,
-
-      :bundler_silent => false,
-      :bundler_local => false,
-      :bundler_include => false
-    }
-
-    DEFAULT_PACKAGES = [ :deb, :rpm ]
     DEFAULT_LOCAL_BIN_PATH = '/usr/local/bin'
-
-    PACKAGE_METHOD_MAP = {
-      :deb => :build_deb,
-      :rpm => :build_rpm
-    }
-
-    def self.load_patch
-      PatchBundlerNoMetadataDeps.patch!
-    end
-
-    def self.setup
-      load_patch
-      load_packfile
-      setup_defaults
-    end
-
-    def self.setup_defaults
-      if ENV.include?('PACKTORY_PACKAGES') && !ENV['PACKTORY_PACKAGES'].empty?
-        config[:packages] = ENV['PACKTORY_PACKAGES'].split(',').collect { |p| p.to_sym }
-      elsif config[:packages].nil?
-        config[:packages] = DEFAULT_PACKAGES
-      end
-
-      if ENV.include?('PACKTORY_BUNDLE_WORKING_PATH')
-        config[:bundle_working_path] = File.expand_path(ENV['PACKTORY_BUNDLE_WORKING_PATH'])
-      end
-
-      unless config[:dependencies].include?('ruby')
-        config[:dependencies]['ruby'] = nil
-      end
-    end
-
-    def self.load_packfile
-      packfile_path = nil
-
-      if ENV.include?('PACKTORY_PACKFILE')
-        packfile_path = File.expand_path(ENV['PACKTORY_PACKFILE'])
-      else
-        packfile_path = search_up(PACKTORY_PACKFILE)
-      end
-
-      unless packfile_path.nil?
-        load packfile_path
-      end
-
-      packfile_path
-    end
-
-    def self.search_up(*names)
-      previous = nil
-      current  = File.expand_path(config[:path] || Dir.pwd).untaint
-      found_path = nil
-
-      until !File.directory?(current) || current == previous || !found_path.nil?
-        names.each do |name|
-          path = File.join(current, name)
-          if File.exists?(path)
-            found_path = path
-            break
-          end
-        end
-
-        if found_path.nil?
-          previous = current
-          current = File.expand_path("..", current)
-        end
-      end
-
-      found_path
-    end
-
-    def self.configure
-      yield config
-    end
-
-    def self.config
-      if defined?(@@global_config)
-        @@global_config
-      else
-        @@global_config = DEFAULT_CONFIG.merge({ })
-      end
-    end
-
-    def self.build_package(opts = { })
-      packages = config[:packages]
-      packages.each do |pack|
-        build_method = PACKAGE_METHOD_MAP[pack]
-        unless build_method.nil?
-          send(build_method, opts)
-        end
-      end
-    end
-
-    def self.build_deb(opts = { })
-      DebPackage.build_package(opts)
-    end
-
-    def self.build_rpm(opts = { })
-      RpmPackage.build_package(opts)
-    end
 
     def self.silence_warnings
       original_verbosity = $VERBOSE
@@ -151,7 +23,7 @@ module Packtory
     attr_reader :gemspec_file
 
     def initialize(opts = { })
-      @opts = self.class.config.merge(opts)
+      @opts = Packtory.config.merge(opts)
 
       unless @opts[:gemfile].nil?
         @gemfile = Pathname.new(@opts[:gemfile])

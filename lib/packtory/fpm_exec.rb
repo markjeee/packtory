@@ -3,14 +3,14 @@ require 'bundler'
 module Packtory
   class FpmExec
     def self.fpm_exec_path
-      if !Packer.config[:fpm_exec_path].nil? && !Packer.config[:fpm_exec_path].empty?
-        Packer.config[:fpm_exec_path]
+      if !Packtory.config[:fpm_exec_path].nil? && !Packtory.config[:fpm_exec_path].empty?
+        Packtory.config[:fpm_exec_path]
       else
         Packtory.bin_support_fpm_path
       end
     end
 
-    def initialize(packager, prefix_path)
+    def initialize(packager, prefix_path = nil)
       @packager = packager
       @prefix_path = prefix_path
     end
@@ -23,7 +23,7 @@ module Packtory
 
       Bundler.ui.info 'CMD: %s' % cmd
 
-      if Packer.config[:fpm_exec_verbose]
+      if Packtory.config[:fpm_exec_verbose]
         Bundler.clean_system('%s' % cmd)
       else
         Bundler.clean_system('%s >/dev/null 2>&1' % cmd)
@@ -33,13 +33,15 @@ module Packtory
     end
 
     def build_cmd(sfiles_map, pkg_file, opts = { })
-      cmd = '%s --log %s -f -s dir' % [ self.class.fpm_exec_path, Packer.config[:fpm_exec_log] || 'warn' ]
+      cmd = '%s --log %s -f -s dir' % [ self.class.fpm_exec_path, Packtory.config[:fpm_exec_log] || 'warn' ]
 
       case opts[:type]
       when :rpm
         cmd << ' -t rpm --rpm-os linux'
       when :deb
         cmd << ' -t deb'
+      when :tgz
+        cmd << ' -t tar'
       else
         raise 'Unsupported type: %s' % opts[:type]
       end

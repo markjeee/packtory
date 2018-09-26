@@ -34,16 +34,16 @@ module Packtory
 
       say 'Using build path : %s' % @build_path
 
-      Packer.config[:fpm_exec_path] = @fpm_exec_path
-      Packer.config[:path] = @build_path
+      Packtory.config[:fpm_exec_path] = @fpm_exec_path
+      Packtory.config[:path] = @build_path
 
       if ENV['FPM_EXEC_VERBOSE'] && ENV['FPM_EXEC_VERBOSE'] == '1'
-        Packer.config[:fpm_exec_verbose] = true
+        Packtory.config[:fpm_exec_verbose] = true
       end
 
       if !ENV['FPM_EXEC_LOG'].nil? && !ENV['FPM_EXEC_LOG'].empty?
-        Packer.config[:fpm_exec_verbose] = true
-        Packer.config[:fpm_exec_log] = ENV['FPM_EXEC_LOG']
+        Packtory.config[:fpm_exec_verbose] = true
+        Packtory.config[:fpm_exec_log] = ENV['FPM_EXEC_LOG']
       end
 
       self
@@ -74,7 +74,7 @@ module Packtory
       end
 
       say 'Using spec file  : %s' % @gemspec_file
-      Packer.config[:gemspec] = @gemspec_file
+      Packtory.config[:gemspec] = @gemspec_file
 
       self
     end
@@ -95,11 +95,11 @@ module Packtory
         end
 
         say 'Using Gemfile    : %s' % @bundle_gemfile
-        Packer.config[:gemfile] = @bundle_gemfile
+        Packtory.config[:gemfile] = @bundle_gemfile
       end
 
       if ENV['BUNDLER_INCLUDE']
-        Packer.config[:bundler_include] = true
+        Packtory.config[:bundler_include] = true
       end
 
       self
@@ -116,7 +116,7 @@ module Packtory
         say 'Using ruby deps  : latest'
       end
 
-      Packer.config[:dependencies]['ruby'] = @ruby_version
+      Packtory.config[:dependencies]['ruby'] = @ruby_version
       @deps['ruby'] = @ruby_version
 
       if ENV['PACKAGE_DEPENDENCIES']
@@ -126,7 +126,7 @@ module Packtory
             pname = $~[1]
             pver = $~[2]
 
-            Packer.config[:dependencies][pname] = pver
+            Packtory.config[:dependencies][pname] = pver
             @deps[pname] = pver
           end
         end
@@ -142,19 +142,21 @@ module Packtory
         packages << :rpm
       elsif ENV['PACKAGE_OUTPUT'] == 'deb'
         packages << :deb
+      elsif ENV['PACKAGE_OUTPUT'] == 'tgz'
+        packages << :tgz
       else
         # Debian is the default output
         packages << :deb
       end
 
       say 'Package output   : %s' % packages.join(', ')
-      Packer.config[:packages] = packages
+      Packtory.config[:packages] = packages
 
       if ENV['PACKAGE_PATH']
         pkg_path = File.expand_path(ENV['PACKAGE_PATH'])
 
         say 'Package path     : %s' % pkg_path
-        Packer.config[:pkg_path] = pkg_path
+        Packtory.config[:pkg_path] = pkg_path
       end
 
       self
@@ -166,7 +168,7 @@ module Packtory
       info_h = {
         :version => ::Packtory::VERSION,
         :fpm_version => `#{@fpm_exec_path} -v`.strip
-      }.merge(Packer.config)
+      }.merge(Packtory.config)
 
       File.open(dump_file, 'w') do |f|
         f.write(YAML.dump(info_h))
@@ -191,14 +193,14 @@ module Packtory
 
       say '=================='
 
-      Packer.setup
+      Packtory.setup
 
       if ENV['TEST_DUMPINFO']
         test_dumpinfo(argv)
       elsif ENV['TEST_NOBUILD']
         # do nothing
       else
-        Packer.build_package
+        Packtory.build_package
       end
     end
 
