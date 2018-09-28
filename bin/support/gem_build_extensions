@@ -1,4 +1,4 @@
-#!/usr/bin/env ruby
+#!/usr/bin/ruby
 
 require 'rubygems'
 require 'rubygems/installer'
@@ -21,8 +21,8 @@ end
 puts 'Bundle path   : %s' % bundle_path
 puts 'Gemspec path  : %s' % gemspec_path
 
-spec = eval(File.read(gemspec_path)).tap do |spec|
-  spec.loaded_from = gemspec_path
+spec = eval(File.read(gemspec_path)).tap do |s|
+  s.loaded_from = gemspec_path
 end
 
 gem_path = File.join(bundle_path, spec.name)

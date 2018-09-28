@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 this_dir=$(cd $(dirname $0); pwd)
 
@@ -28,6 +28,6 @@ extensions_path=$PACKAGE_PATH/extensions
 if [ -d $extensions_path ]; then
     for gemspec in $extensions_path/*.gemspec; do
         echo "== Processing $(basename $gemspec) =="
-        $gem_build_extensions_path $PACKAGE_PATH/bundle $gemspec
+        /usr/bin/ruby $gem_build_extensions_path $PACKAGE_PATH/bundle $gemspec
     done
 fi

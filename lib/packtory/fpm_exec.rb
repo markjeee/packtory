@@ -23,17 +23,21 @@ module Packtory
 
       Bundler.ui.info 'CMD: %s' % cmd
 
-      if Packtory.config[:fpm_exec_verbose]
-        Bundler.clean_system('%s' % cmd)
-      else
-        Bundler.clean_system('%s >/dev/null 2>&1' % cmd)
+      unless Packtory.config[:fpm_exec_verbose]
+        cmd = '%s >/dev/null 2>&1' % cmd
       end
+
+      Bundler.clean_system(cmd)
 
       pkg_file
     end
 
     def build_cmd(sfiles_map, pkg_file, opts = { })
       cmd = '%s --log %s -f -s dir' % [ self.class.fpm_exec_path, Packtory.config[:fpm_exec_log] || 'warn' ]
+
+      unless Packtory.config[:fpm_use_ruby_path].nil?
+        cmd = 'env FPM_USE_RUBY_PATH=%s %s' % [ Packtory.config[:fpm_use_ruby_path], cmd ]
+      end
 
       case opts[:type]
       when :rpm

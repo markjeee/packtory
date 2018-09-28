@@ -14,4 +14,8 @@ else
     fi
 fi
 
-$fpm_ruby "$@"
+if [ -n "$FPM_USE_RUBY_PATH" ]; then
+    $FPM_USE_RUBY_PATH $fpm_ruby "$@"
+else
+    $fpm_ruby "$@"
+fi

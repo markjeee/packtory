@@ -19,11 +19,7 @@ Gem::Specification.new do |s|
   s.add_dependency    'bundler'
   s.add_dependency    'fpm'
 
-  s.description = <<DESCRIPTION
-An easy to use system packaging tool for your Ruby
-gems. Build package for Debian, RPM, and _soon_ Homebrew, directly
-from your gem repo.
-DESCRIPTION
+  s.description = "An easy to use system packaging tool for your Ruby gems. Build package for Debian, RPM, and _soon_ Homebrew, directly from your gem repo."
 
   s.post_install_message =<<POSTINSTALL
 ************************************************************************

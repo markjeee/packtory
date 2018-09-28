@@ -13,6 +13,10 @@ module Packtory
         @fpm_exec_path = Packtory.bin_support_fpm_path
       end
 
+      if !ENV['FPM_USE_RUBY_PATH'].nil? && !ENV['FPM_USE_RUBY_PATH'].empty?
+        Packtory.config[:fpm_use_ruby_path] = ENV['FPM_USE_RUBY_PATH']
+      end
+
       if @fpm_exec_path.nil? || @fpm_exec_path.empty?
         say 'ERROR: `fpm` executable is not in path. Perhaps, install fpm first?'
         exit 1
@@ -30,8 +34,11 @@ module Packtory
       end
 
       say 'Using fpm path   : %s' % @fpm_exec_path
-      say 'Using fpm        : %s' % `#{@fpm_exec_path} -v`.strip
+      unless Packtory.config[:fpm_use_ruby_path].nil?
+        say 'Fpm using ruby   : %s' % Packtory.config[:fpm_use_ruby_path]
+      end
 
+      say 'Using fpm        : %s' % `#{exec_fpm} -v`.strip
       say 'Using build path : %s' % @build_path
 
       Packtory.config[:fpm_exec_path] = @fpm_exec_path
@@ -47,6 +54,14 @@ module Packtory
       end
 
       self
+    end
+
+    def exec_fpm
+      if Packtory.config[:fpm_use_ruby_path].nil?
+        @fpm_exec_path
+      else
+        'env FPM_USE_RUBY_PATH=%s %s' % [ Packtory.config[:fpm_use_ruby_path], @fpm_exec_path ]
+      end
     end
 
     def detect_specfile(argv)

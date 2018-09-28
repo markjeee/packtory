@@ -16,6 +16,7 @@ module Packtory
       :dependencies => { },
       :bundle_working_path => nil,
 
+      :fpm_use_ruby_path => nil,
       :fpm_exec_path => nil,
       :fpm_exec_verbose => false,
       :fpm_exec_log => nil,
