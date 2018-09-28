@@ -1,6 +1,11 @@
 #!/usr/bin/env ruby
 
-$:.unshift File.expand_path('../../lib', __FILE__)
+this_file = __FILE__
+while File.symlink?(this_file)
+  this_file = File.readlink(this_file)
+end
+
+$:.unshift File.expand_path('../../lib', this_file)
 require 'packtory'
 
 Packtory::Command.run(ARGV)
