@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 
+this_dir=$(cd $(dirname $0); pwd)
+
 PACKAGE_PATH="<%= pg_PACKAGE_PATH %>"
 
 # this is a special trap, in case the fpm templating did not its job
 if [[ $PACKAGE_PATH == \<* ]]; then
-    PACKAGE_PATH=""
+    PACKAGE_PATH="$(dirname $(dirname "$this_dir"))"
 fi
-
-this_dir=$(cd $(dirname $0); pwd)
 
 if [ -n "$PACKAGE_PATH" ]; then
     eval "export PACKAGE_PATH=$PACKAGE_PATH"
