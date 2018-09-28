@@ -113,7 +113,7 @@ module Packtory
           cached_gems[spec.name] = spec.source.send(:cached_gem, spec)
         end
 
-        if @opts[:bundler_include]
+        if detect_bundler_include
           bundler_source = Bundler::Source::Rubygems.new('remotes' => 'https://rubygems.org')
           @bundler_spec = Bundler::RemoteSpecification.
                            new('bundler', Bundler::VERSION,
@@ -237,15 +237,25 @@ GEMFILE
       @opts[:architecture]
     end
 
+    def detect_bundler_include
+      if @opts[:bundler_include]
+        true
+      elsif !gemspec.dependencies.detect { |d| d.name == 'bundler' }.nil?
+        true
+      else
+        false
+      end
+    end
+
     def bundle_gems
       bgems = { }
-      specs = bundler_definition.specs_for([ :default ])
 
+      specs = bundler_definition.specs_for([ :default ])
       specs.each do |spec|
         next if gemspec.nil? || spec.name == gemspec.name
 
         if spec.name == 'bundler'
-          if @opts[:bundler_include]
+          if detect_bundler_include
             spec = @bundler_spec
           else
             next
