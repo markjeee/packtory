@@ -8,7 +8,7 @@ module Packtory
       :binstub => nil,
       :bin_path => nil,
       :install_as_subpath => false,
-      :setup_reset_gem_paths => false,
+      :setup_reset_gem_paths => true,
       :packages => nil,
       :architecture => 'all',
 
