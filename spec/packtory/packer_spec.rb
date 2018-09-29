@@ -74,7 +74,6 @@ describe 'Packer' do
 
       expect(files).to include('README.md')
       expect(files).to include('lib/some_gem.rb')
-      expect(files).to include('bundle/bundler/setup.rb')
     end
 
     it 'should prepare files' do

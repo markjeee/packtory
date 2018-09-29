@@ -42,4 +42,8 @@ module Packtory
   def self.bin_support_fpm_path
     File.expand_path('../../bin/support/fpm', __FILE__)
   end
+
+  def self.bundler_setup_path
+    File.expand_path('../packtory/bundler/setup.rb', __FILE__)
+  end
 end

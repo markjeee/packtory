@@ -344,6 +344,8 @@ GEMFILE
         files = gather_packtory_tools_for_package(files)
       end
 
+      files[Packtory.bundler_setup_path] = { :target_path => File.join(BUNDLE_TARGET_PATH, BUNDLE_BUNDLER_SETUP_FILE) }
+
       files
     end
 
@@ -361,36 +363,18 @@ GEMFILE
       files
     end
 
-    def create_bundle_setup_rb
-      bundle_setup_file = File.join(BUNDLE_TARGET_PATH, BUNDLE_BUNDLER_SETUP_FILE)
-      bundle_setup_path = File.join(package_working_path, package_name, bundle_setup_file)
-
-      FileUtils.mkpath(File.dirname(bundle_setup_path))
-
+    def for_each_bundle_gems(&block)
       bgems = bundle_gems
-      File.open(bundle_setup_path, 'w') do |f|
-        f.puts '# Adding require paths to load path (empty if no gems is needed)'
-        f.puts ''
-
-        bgems.each do |gem_name, bhash|
-          spec = bhash[:spec]
-          f.puts '# == Gem: %s, version: %s' % [ spec.name, spec.version ]
-
-          src_paths = bhash[:require_paths]
-          if src_paths.count > 0
-            rpaths = src_paths.dup
-          else
-            rpaths = [ '/lib' ]
-          end
-
-          rpaths.each do |rpath|
-            load_path_line = "$:.unshift File.expand_path('../../%s%s', __FILE__)" % [ gem_name, rpath ]
-            f.puts(load_path_line)
-          end
+      bgems.each do |gem_name, bhash|
+        src_paths = bhash[:require_paths]
+        if src_paths.count > 0
+          rpaths = src_paths.dup
+        else
+          rpaths = [ '/lib' ]
         end
-      end
 
-      [ bundle_setup_file, bundle_setup_path ]
+        yield(gem_name, bhash, rpaths)
+      end
     end
 
     def gather_files
@@ -423,37 +407,43 @@ GEMFILE
         FileUtils.mkpath(File.dirname(ftarget_path))
         FileUtils.cp_r(fsrc_path, ftarget_path)
 
-        unless tvalues.nil?
-          tf = TemplateFile.new(ftarget_path, tvalues)
+        if ftarget.is_a?(Hash)
+          tf = TemplateFile.new(self, ftarget_path, tvalues)
           tf.evaluate!
         end
 
         ftarget_path
       end
 
-      fsrc, ftarget = create_bundle_setup_rb
-      files[fsrc] = ftarget
-
       files
     end
 
     class TemplateFile
-      def initialize(file_path, tvalues)
+      def initialize(packer, file_path, tvalues)
+        @packer = packer
         @file_path = file_path
         @tvalues = tvalues
       end
 
       def evaluate!
-        erb = ERB.new(File.read(@file_path))
+        erb = ERB.new(File.read(@file_path), nil, nil, '@output_buffer')
         File.write(@file_path, erb.result(binding))
 
         @file_path
       end
 
+      def packer; @packer; end
+
+      def concat(str)
+        @output_buffer << str
+      end
+
       private
 
       def method_missing(k, *args)
-        if @tvalues.include?(k.to_s)
+        if @tvalues.nil?
+          super
+        elsif @tvalues.include?(k.to_s)
           @tvalues[k.to_s]
         elsif @tvalues.include?(k)
           @tvalues[k]
