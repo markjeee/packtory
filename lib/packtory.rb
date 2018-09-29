@@ -14,6 +14,7 @@ module Packtory
   autoload :DebPackage, File.expand_path('../packtory/deb_package', __FILE__)
   autoload :RpmPackage, File.expand_path('../packtory/rpm_package', __FILE__)
   autoload :TgzPackage, File.expand_path('../packtory/tgz_package', __FILE__)
+  autoload :BrewPackage, File.expand_path('../packtory/brew_package', __FILE__)
 
   # TODO: Evaluate and refactor
   autoload :RakeTask, File.expand_path('../packtory/rake_task', __FILE__)
@@ -28,6 +29,10 @@ module Packtory
 
   def self.build_package
     Packages.build_package
+  end
+
+  def self.after_install_script_path
+    File.expand_path('../../bin/support/after_install_script', __FILE__)
   end
 
   def self.gem_build_extensions_path

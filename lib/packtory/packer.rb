@@ -1,5 +1,6 @@
 require 'fileutils'
 require 'bundler'
+require 'erb'
 
 module Packtory
   class Packer
@@ -8,7 +9,7 @@ module Packtory
     BUNDLE_PACKTORY_TOOLS_PATH = 'packtory_tools'
     BUNDLE_BUNDLER_SETUP_FILE = 'bundler/setup.rb'
 
-    DEFAULT_LOCAL_BIN_PATH = '/usr/local/bin'
+    DEFAULT_BIN_PATH = '/usr/local/bin'
 
     def self.silence_warnings
       original_verbosity = $VERBOSE
@@ -115,9 +116,11 @@ module Packtory
 
         if detect_bundler_include
           bundler_source = Bundler::Source::Rubygems.new('remotes' => 'https://rubygems.org')
-          @bundler_spec = Bundler::RemoteSpecification.
-                           new('bundler', Bundler::VERSION,
-                               Gem::Platform::RUBY, bundler_source.fetchers.first)
+
+          @bundler_spec =
+            Bundler::RemoteSpecification.new('bundler', Bundler::VERSION,
+                                             Gem::Platform::RUBY, bundler_source.fetchers.first)
+
           @bundler_spec.remote = Bundler::Source::Rubygems::Remote.new(bundler_source.remotes.first)
 
           bundler_source.send(:fetch_gem, @bundler_spec)
@@ -345,10 +348,15 @@ GEMFILE
     end
 
     def gather_packtory_tools_for_package(files)
-      gem_build_extensions_path = Packtory.gem_build_extensions_path
       target_tools_path = File.join(BUNDLE_PACKTORY_TOOLS_PATH)
 
+      gem_build_extensions_path = Packtory.gem_build_extensions_path
       files[gem_build_extensions_path] = File.join(target_tools_path, File.basename(gem_build_extensions_path))
+
+      after_install_script_path = Packtory.after_install_script_path
+      files[after_install_script_path] = { :target_path => File.join(target_tools_path,
+                                                                     File.basename(after_install_script_path)),
+                                           :values => { 'pg_PACKAGE_PATH' => '$(dirname "$this_dir")' } }
 
       files
     end
@@ -396,16 +404,31 @@ GEMFILE
 
       files = gather_files_for_package
       files.each do |fsrc, ftarget|
+        tvalues = nil
+
         if fsrc =~ /^\//
           fsrc_path = fsrc
-      else
-        fsrc_path = File.join(root_path, fsrc)
+        else
+          fsrc_path = File.join(root_path, fsrc)
         end
 
-        ftarget_path = File.join(prefix_path, ftarget)
+        case ftarget
+        when String
+          ftarget_path = File.join(prefix_path, ftarget)
+        when Hash
+          ftarget_path = File.join(prefix_path, ftarget[:target_path])
+          tvalues = ftarget[:values]
+        end
 
         FileUtils.mkpath(File.dirname(ftarget_path))
         FileUtils.cp_r(fsrc_path, ftarget_path)
+
+        unless tvalues.nil?
+          tf = TemplateFile.new(ftarget_path, tvalues)
+          tf.evaluate!
+        end
+
+        ftarget_path
       end
 
       fsrc, ftarget = create_bundle_setup_rb
@@ -414,9 +437,35 @@ GEMFILE
       files
     end
 
+    class TemplateFile
+      def initialize(file_path, tvalues)
+        @file_path = file_path
+        @tvalues = tvalues
+      end
+
+      def evaluate!
+        erb = ERB.new(File.read(@file_path))
+        File.write(@file_path, erb.result(binding))
+
+        @file_path
+      end
+
+      private
+
+      def method_missing(k, *args)
+        if @tvalues.include?(k.to_s)
+          @tvalues[k.to_s]
+        elsif @tvalues.include?(k)
+          @tvalues[k]
+        else
+          super
+        end
+      end
+    end
+
     def create_binstub(binstub_fname, prefix_path)
       binstub_code = <<CODE
-#!/usr/bin/env ruby
+#!/usr/bin/ruby
 
 require "%s"
 load "%s"
@@ -425,10 +474,16 @@ CODE
       src_bin_path = File.join(package_working_path, 'bin', binstub_fname)
       FileUtils.mkpath(File.dirname(src_bin_path))
 
-      bundler_setup_path = File.join(prefix_path, package_name, BUNDLE_TARGET_PATH, BUNDLE_BUNDLER_SETUP_FILE)
+      if @opts[:install_as_subpath]
+        target_path = File.join(prefix_path, package_name, package_name)
+      else
+        target_path = File.join(prefix_path, package_name)
+      end
+
+      bundler_setup_path = File.join(target_path, BUNDLE_TARGET_PATH, BUNDLE_BUNDLER_SETUP_FILE)
 
       bindir_name = gemspec.nil? ? 'bin' : gemspec.bindir
-      actual_bin_path = File.join(prefix_path, package_name, bindir_name, binstub_fname)
+      actual_bin_path = File.join(target_path, bindir_name, binstub_fname)
 
       File.open(src_bin_path, 'w') { |f| f.write(binstub_code % [ bundler_setup_path, actual_bin_path ]) }
       FileUtils.chmod(0755, src_bin_path)
@@ -436,27 +491,25 @@ CODE
       src_bin_path
     end
 
-    def build_source_files(prefix_path)
+    def build_file_map(prefix_path, package_path = nil)
       files = { }
 
       source_path = File.join(package_working_path, package_name, '/')
-      target_path = File.join(prefix_path, package_name)
+      target_path = File.join(package_path || prefix_path, package_name)
       files[source_path] = target_path
 
       files
     end
 
-    def prepare_files(prefix_path)
-      gather_files
-
-      files = build_source_files(prefix_path)
+    def add_bin_files(files, prefix_path, package_path = nil)
+      bin_path = @opts[:bin_path] || DEFAULT_BIN_PATH
 
       if @opts[:binstub].nil?
         unless gemspec.nil? || gemspec.executables.nil? || gemspec.executables.empty?
           @opts[:binstub] = { }
 
           gemspec.executables.each do |exec_fname|
-            @opts[:binstub][exec_fname] = File.join(DEFAULT_LOCAL_BIN_PATH, exec_fname)
+            @opts[:binstub][exec_fname] = File.join(bin_path, exec_fname)
           end
         end
       end
@@ -465,6 +518,15 @@ CODE
         src_binstub_file = create_binstub(binstub_fname, prefix_path)
         files[src_binstub_file] = binstub_file
       end unless @opts[:binstub].nil?
+
+      files
+    end
+
+    def prepare_files(prefix_path, package_path = nil)
+      gather_files
+
+      files = build_file_map(prefix_path, package_path)
+      files = add_bin_files(files, prefix_path, package_path)
 
       files
     end

@@ -62,7 +62,7 @@ module Packtory
 
       cmd << ' -p %s --after-install %s --template-scripts %s %s %s' %
              [ pkg_file,
-               after_install_script,
+               Packtory.after_install_script_path,
                package_dependencies,
                template_values,
                source_files_map(sfiles_map) ]
@@ -92,10 +92,6 @@ module Packtory
           '-d "%s%s"' % [ k, v ]
         end
       end.join(' ')
-    end
-
-    def after_install_script
-      File.expand_path('../../../bin/support/after_install_script', __FILE__)
     end
   end
 end

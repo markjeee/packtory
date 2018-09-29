@@ -159,8 +159,9 @@ module Packtory
         packages << :deb
       elsif ENV['PACKAGE_OUTPUT'] == 'tgz'
         packages << :tgz
+      elsif ENV['PACKAGE_OUTPUT'] == 'brew'
+        packages << :brew
       else
-        # Debian is the default output
         packages << :deb
       end
 

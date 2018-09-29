@@ -6,6 +6,8 @@ module Packtory
       :gemspec => nil,
       :gemfile => nil,
       :binstub => nil,
+      :bin_path => nil,
+      :install_as_subpath => false,
       :packages => nil,
       :architecture => 'all',
 

@@ -3,7 +3,8 @@ module Packtory
     PACKAGE_METHOD_MAP = {
       :deb => :build_deb,
       :rpm => :build_rpm,
-      :tgz => :build_tgz
+      :tgz => :build_tgz,
+      :brew => :build_brew
     }
 
     def self.build_package(opts = { })
@@ -30,6 +31,10 @@ module Packtory
 
     def self.build_tgz(opts = { })
       TgzPackage.build_package(opts)
+    end
+
+    def self.build_brew(opts = { })
+      BrewPackage.build_package(opts)
     end
   end
 end
