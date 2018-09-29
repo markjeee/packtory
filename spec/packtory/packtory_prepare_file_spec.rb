@@ -9,7 +9,7 @@ describe 'Packtory file preparation' do
     end
 
     it 'should build source files' do
-      files = @packtory.build_source_files(@prefix_path)
+      files = @packtory.build_file_map(@prefix_path)
 
       wp = @packtory.package_working_path
       expect(files.keys).to include(File.join(wp, 'some_gem/'))
