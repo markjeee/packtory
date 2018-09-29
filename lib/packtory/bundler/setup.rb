@@ -1,10 +1,12 @@
 # Adding require paths to load path (empty if no gems is needed)
 
+<% if Packtory.config[:setup_reset_gem_paths] -%>
 require 'rubygems'
 
 ENV['GEM_HOME'] = ''
 ENV['GEM_PATH'] = ''
 Gem.clear_paths
+<% end -%>
 
 <%
 packer.for_each_bundle_gems do |gem_name, bhash, rpaths|

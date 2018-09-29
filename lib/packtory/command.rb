@@ -15,6 +15,8 @@ module Packtory
 
       if !ENV['FPM_USE_RUBY_PATH'].nil? && !ENV['FPM_USE_RUBY_PATH'].empty?
         Packtory.config[:fpm_use_ruby_path] = ENV['FPM_USE_RUBY_PATH']
+      elsif !ENV['RUBY_PATH'].nil? && !ENV['RUBY_PATH'].empty?
+        Packtory.config[:fpm_use_ruby_path] = ENV['RUBY_PATH']
       end
 
       if @fpm_exec_path.nil? || @fpm_exec_path.empty?

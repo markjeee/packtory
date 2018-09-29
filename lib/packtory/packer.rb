@@ -426,7 +426,7 @@ GEMFILE
       end
 
       def evaluate!
-        erb = ERB.new(File.read(@file_path), nil, nil, '@output_buffer')
+        erb = ERB.new(File.read(@file_path), nil, '-', '@output_buffer')
         File.write(@file_path, erb.result(binding))
 
         @file_path
@@ -456,6 +456,8 @@ GEMFILE
     def create_binstub(binstub_fname, prefix_path)
       binstub_code = <<CODE
 #!/usr/bin/ruby
+
+ENV['RUBY_PATH'] = '/usr/bin/ruby'
 
 require "%s"
 load "%s"
