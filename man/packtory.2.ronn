@@ -1,0 +1,19 @@
+packtory(2) -- Tool to package Ruby gems into system packages.
+=============================================
+
+## INSTALL
+
+You may install Packtory using Debian, RPM, Homebrew, or Rubygems.
+
+Via Rubygems:
+
+```
+gem install packtory
+```
+
+Via Homebrew:
+
+```
+brew tap packtory/tap
+brew install packtory
+```
