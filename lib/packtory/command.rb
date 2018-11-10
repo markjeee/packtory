@@ -180,6 +180,17 @@ module Packtory
       self
     end
 
+    def detect_package_opts(argv)
+      if !ENV['PACKAGE_NAME'].nil? && !ENV['PACKAGE_NAME'].empty?
+        package_name = ENV['PACKAGE_NAME']
+
+        say 'Package name     : %s' % package_name
+        Packtory.config[:package_name] = package_name
+      end
+
+      self
+    end
+
     def test_dumpinfo(argv)
       dump_file = File.expand_path(ENV['TEST_DUMPINFO'])
 
@@ -207,6 +218,7 @@ module Packtory
       detect_specfile(argv)
       detect_gemfile(argv)
       detect_deps(argv)
+      detect_package_opts(argv)
       detect_package_output(argv)
 
       say '=================='
