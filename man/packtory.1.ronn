@@ -1,0 +1,26 @@
+packtory(1) -- Tool to package Ruby gems into system packages.
+=============================================
+
+## SYNOPSIS
+
+`packtory build DIR`<br />
+`packtory build --output-type=deb|rpm|brew`<br />
+`packtory build -t deb|rpm|brew`<br />
+`packtory build --output-path=PATH`<br />
+`packtory build -o PATH`<br />
+`packtory build --name=PACKAGE_NAME`<br />
+`packtory build --n PACKAGE_NAME`<br />
+`packtory build --ruby-version=2.5.1`<br />
+`packtory build --package-depends=libmysql=1.9.3,libxml`<br />
+`packtory build --specfile=path_to/gem_name.spec`<br />
+`packtory build -s path_to/gem_name.spec`<br />
+`packtory build --gemfile=path_to/Gemfile`<br />
+`packtory build -g path_to/Gemfile`<br />
+`packtory -v`<br />
+`packtory help`<br />
+
+## DESCRIPTION
+
+Tool to package Ruby gems into system packages. Supports Debian, RPM, and Homebrew.
+
+Tested and compatible with Ubuntu, Debian, Fedora, CentOS.

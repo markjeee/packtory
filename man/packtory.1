@@ -1,0 +1,60 @@
+.\" generated with Ronn/v0.7.3
+.\" http://github.com/rtomayko/ronn/tree/0.7.3
+.
+.TH "PACKTORY" "1" "November 2018" "" ""
+.
+.SH "NAME"
+\fBpacktory\fR \- Tool to package Ruby gems into system packages\.
+.
+.SH "SYNOPSIS"
+\fBpacktory build DIR\fR
+.
+.br
+\fBpacktory build \-\-output\-type=deb|rpm|brew\fR
+.
+.br
+\fBpacktory build \-t deb|rpm|brew\fR
+.
+.br
+\fBpacktory build \-\-output\-path=PATH\fR
+.
+.br
+\fBpacktory build \-o PATH\fR
+.
+.br
+\fBpacktory build \-\-name=PACKAGE_NAME\fR
+.
+.br
+\fBpacktory build \-\-n PACKAGE_NAME\fR
+.
+.br
+\fBpacktory build \-\-ruby\-version=2\.5\.1\fR
+.
+.br
+\fBpacktory build \-\-package\-depends=libmysql=1\.9\.3,libxml\fR
+.
+.br
+\fBpacktory build \-\-specfile=path_to/gem_name\.spec\fR
+.
+.br
+\fBpacktory build \-s path_to/gem_name\.spec\fR
+.
+.br
+\fBpacktory build \-\-gemfile=path_to/Gemfile\fR
+.
+.br
+\fBpacktory build \-g path_to/Gemfile\fR
+.
+.br
+\fBpacktory \-v\fR
+.
+.br
+\fBpacktory help\fR
+.
+.br
+.
+.SH "DESCRIPTION"
+Tool to package Ruby gems into system packages\. Supports Debian, RPM, and Homebrew\.
+.
+.P
+Tested and compatible with Ubuntu, Debian, Fedora, CentOS\.
