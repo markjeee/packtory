@@ -24,3 +24,5 @@ packtory(1) -- Tool to package Ruby gems into system packages.
 Tool to package Ruby gems into system packages. Supports Debian, RPM, and Homebrew.
 
 Tested and compatible with Ubuntu, Debian, Fedora, CentOS.
+
+Use fpm to build the actual packages.

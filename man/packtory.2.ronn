@@ -17,3 +17,5 @@ Via Homebrew:
 brew tap packtory/tap
 brew install packtory
 ```
+
+Use fpm to build the actual packages.
