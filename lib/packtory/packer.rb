@@ -42,6 +42,8 @@ module Packtory
         @gemfile = autogenerate_clean_gemfile
       end
 
+      @files = nil
+
       self
     end
 
@@ -153,7 +155,7 @@ module Packtory
       gemfile_path = File.join(working_path, 'Gemfile')
       File.open(gemfile_path, 'w') do |f|
         gemfile_content = <<GEMFILE
-source "http://rubygems.org"
+source 'http://rubygems.org'
 gemspec :path => '%s', :name => '%s'
 GEMFILE
 
@@ -323,8 +325,6 @@ GEMFILE
         end
       end
 
-      include_packtory_tools = false
-
       bgems = bundle_gems
       bgems.each do |gem_name, bhash|
         bhash[:files].each do |file|
@@ -334,16 +334,11 @@ GEMFILE
 
         unless bhash[:spec].extensions.empty?
           add_ruby_build_dependencies!
-          include_packtory_tools = true
-
           files[bhash[:orig_spec].loaded_from] = File.join(BUNDLE_EXTENSIONS_PATH, '%s.gemspec' % gem_name)
         end
       end
 
-      if include_packtory_tools
-        files = gather_packtory_tools_for_package(files)
-      end
-
+      files = gather_packtory_tools_for_package(files)
       files[Packtory.bundler_setup_path] = { :target_path => File.join(BUNDLE_TARGET_PATH, BUNDLE_BUNDLER_SETUP_FILE) }
 
       files
@@ -388,21 +383,13 @@ GEMFILE
 
       files = gather_files_for_package
       files.each do |fsrc, ftarget|
-        tvalues = nil
-
         if fsrc =~ /^\//
           fsrc_path = fsrc
         else
           fsrc_path = File.join(root_path, fsrc)
         end
 
-        case ftarget
-        when String
-          ftarget_path = File.join(prefix_path, ftarget)
-        when Hash
-          ftarget_path = File.join(prefix_path, ftarget[:target_path])
-          tvalues = ftarget[:values]
-        end
+        ftarget_path, tvalues = path_to_gathered_file(files, fsrc)
 
         FileUtils.mkpath(File.dirname(ftarget_path))
         FileUtils.cp_r(fsrc_path, ftarget_path)
@@ -416,6 +403,24 @@ GEMFILE
       end
 
       files
+    end
+
+    def path_to_gathered_file(files, fkey)
+      prefix_path = File.join(package_working_path, package_name)
+
+      ftarget = files[fkey]
+      ftarget_path = nil
+      tvalues = nil
+
+      case ftarget
+      when String
+        ftarget_path = File.join(prefix_path, ftarget)
+      when Hash
+        ftarget_path = File.join(prefix_path, ftarget[:target_path])
+        tvalues = ftarget[:values]
+      end
+
+      [ ftarget_path, tvalues ]
     end
 
     class TemplateFile
@@ -453,47 +458,51 @@ GEMFILE
       end
     end
 
-    def create_binstub(binstub_fname, prefix_path)
+    def create_binstub(binstub_fname, target_prefix_path)
       binstub_code = <<CODE
 #!/usr/bin/ruby
 
 ENV['RUBY_PATH'] = '/usr/bin/ruby'
 
-require "%s"
-load "%s"
+package_prefix = %s
+require File.join(package_prefix, '%s')
+load File.join(package_prefix, '%s')
 CODE
 
       src_bin_path = File.join(package_working_path, 'bin', binstub_fname)
       FileUtils.mkpath(File.dirname(src_bin_path))
 
-      if @opts[:install_as_subpath]
-        target_path = File.join(prefix_path, package_name, package_name)
+      if @opts[:install_prefix_as_code]
+        target_path = @opts[:install_prefix_as_code] % package_name
       else
-        target_path = File.join(prefix_path, package_name)
+        target_path = '"%s"' % (target_prefix_path % package_name)
       end
 
-      bundler_setup_path = File.join(target_path, BUNDLE_TARGET_PATH, BUNDLE_BUNDLER_SETUP_FILE)
+      bundler_setup_path = File.join(BUNDLE_TARGET_PATH, BUNDLE_BUNDLER_SETUP_FILE)
 
       bindir_name = gemspec.nil? ? 'bin' : gemspec.bindir
-      actual_bin_path = File.join(target_path, bindir_name, binstub_fname)
+      actual_bin_path = File.join(bindir_name, binstub_fname)
 
-      File.open(src_bin_path, 'w') { |f| f.write(binstub_code % [ bundler_setup_path, actual_bin_path ]) }
+      File.open(src_bin_path, 'w') do |f|
+        f.write(binstub_code % [ target_path, bundler_setup_path, actual_bin_path ])
+      end
+
       FileUtils.chmod(0755, src_bin_path)
 
       src_bin_path
     end
 
-    def build_file_map(prefix_path, package_path = nil)
+    def build_file_map(target_prefix_path, package_path = nil)
       files = { }
 
       source_path = File.join(package_working_path, package_name, '/')
-      target_path = File.join(package_path || prefix_path, package_name)
+      target_path = (package_path || target_prefix_path) % package_name
       files[source_path] = target_path
 
       files
     end
 
-    def add_bin_files(files, prefix_path, package_path = nil)
+    def add_bin_files(files, target_prefix_path, package_path = nil)
       bin_path = @opts[:bin_path] || DEFAULT_BIN_PATH
 
       if @opts[:binstub].nil?
@@ -507,20 +516,29 @@ CODE
       end
 
       @opts[:binstub].each do |binstub_fname, binstub_file|
-        src_binstub_file = create_binstub(binstub_fname, prefix_path)
+        src_binstub_file = create_binstub(binstub_fname, target_prefix_path)
         files[src_binstub_file] = binstub_file
       end unless @opts[:binstub].nil?
 
       files
     end
 
-    def prepare_files(prefix_path, package_path = nil)
-      gather_files
+    def prepare_files(target_prefix_path, package_path = nil)
+      @files = gather_files
 
-      files = build_file_map(prefix_path, package_path)
-      files = add_bin_files(files, prefix_path, package_path)
+      sfiles_map = build_file_map(target_prefix_path, package_path)
+      sfiles_map = add_bin_files(sfiles_map, target_prefix_path, package_path)
 
-      files
+      sfiles_map
+    end
+
+    def after_install_script_path
+      ftarget_path, _ = path_to_gathered_file(@files, Packtory.after_install_script_path)
+      ftarget_path
+    end
+
+    def template_scripts_values
+      { }
     end
   end
 end

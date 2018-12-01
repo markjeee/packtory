@@ -7,7 +7,7 @@ module Packtory
       :gemfile => nil,
       :binstub => nil,
       :bin_path => nil,
-      :install_as_subpath => false,
+      :install_prefix_as_code => nil,
       :setup_reset_gem_paths => true,
       :packages => nil,
       :architecture => 'all',

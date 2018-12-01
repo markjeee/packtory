@@ -1,8 +1,9 @@
 require 'bundler'
+require 'digest'
 
 module Packtory
   class DebPackage
-    INSTALL_PREFIX = '/usr/lib/ruby/vendor_ruby/'
+    INSTALL_PREFIX = '/usr/lib/ruby/vendor_ruby/%s'
 
     def self.build_package(opts = { })
       packager = Packer.new(opts)
@@ -14,6 +15,7 @@ module Packtory
 
       if File.exist?(pkg_file_path)
         Bundler.ui.info 'Created package: %s (%s bytes)' % [ pkg_file_path, File.size(pkg_file_path) ]
+        Bundler.ui.info 'SHA256 checksum: %s' % Digest::SHA256.file(pkg_file_path).hexdigest
       else
         Bundler.ui.error '[ERROR] Package not found: %s' % [ pkg_file_path ]
       end

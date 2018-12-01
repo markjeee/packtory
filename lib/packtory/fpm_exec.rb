@@ -77,7 +77,13 @@ module Packtory
     end
 
     def template_values
-      values = { 'pg_PACKAGE_PATH' => File.join(@prefix_path, @packager.package_name) }
+      values = { }.merge(@packager.template_scripts_values)
+
+      if !@prefix_path.nil?
+        values['pg_PACKAGE_PATH'] = @prefix_path % @packager.package_name
+      else
+        values['pg_PACKAGE_PATH'] = '<'
+      end
 
       values.collect do |k, v|
         '--template-value %s="%s"' % [ k, v ]

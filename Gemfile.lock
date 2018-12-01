@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    packtory (0.1.3)
+    packtory (0.1.4)
       bundler
       fpm
 

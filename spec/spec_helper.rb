@@ -100,7 +100,7 @@ module PacktorySpec
   end
 
   def self.packtory_pack(config = { })
-    FileUtils.rm_f('%s/*' % spec_pkg_path)
+    FileUtils.rm_rf('%s/*' % spec_pkg_path)
 
     package_output = config[:package_output] || 'deb'
     cmd = 'env PACKAGE_PATH=%s PACKAGE_OUTPUT=%s BUNDLE_GEMFILE=%s BUNDLER_INCLUDE=1 bin/packtory %s >/dev/null 2>&1' %

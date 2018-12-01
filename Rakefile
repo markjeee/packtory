@@ -11,6 +11,7 @@ require 'packtory'
 RSpec::Core::RakeTask.new('spec')
 task :default => :spec
 
+desc 'Run all specs including those using Docker containers'
 task :spec_all do
   ENV['INCLUDE_PACK_EXTRA_SPECS'] = '1'
   ENV['INCLUDE_INSTALL_SPECS'] = '1'
@@ -38,8 +39,9 @@ end
 
 desc 'Craete a Debian package'
 task :pack_deb do
-  cmd = 'env PACKAGE_OUTPUT=%s BUNDLE_GEMFILE=%s BUNDLER_INCLUDE=1 bin/packtory %s' %
+  cmd = 'env PACKAGE_OUTPUT=%s PACKAGE_NAME=%s BUNDLE_GEMFILE=%s BUNDLER_INCLUDE=1 FPM_EXEC_VERBOSE=1 bin/packtory %s' %
         [ ENV['PACK_PACKAGE_OUTPUT'] || 'deb',
+          ENV['PACK_PACKAGE_NAME'] || 'packtory',
           File.expand_path('../Gemfile.system', __FILE__),
           File.expand_path('../', __FILE__) ]
 
@@ -50,5 +52,11 @@ end
 desc 'Create an RPM package'
 task :pack_rpm do
   ENV['PACK_PACKAGE_OUTPUT'] = 'rpm'
+  Rake::Task['pack_deb'].invoke
+end
+
+desc 'Create a Homebrew package'
+task :pack_brew do
+  ENV['PACK_PACKAGE_OUTPUT'] = 'brew'
   Rake::Task['pack_deb'].invoke
 end
