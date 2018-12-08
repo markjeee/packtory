@@ -4,4 +4,4 @@ this_file = File.realpath(__FILE__)
 $:.unshift File.expand_path('../../lib', this_file)
 require 'packtory'
 
-Packtory::Command.run(ARGV)
+exit Packtory::Command.run(ARGV)

@@ -5,6 +5,7 @@ module Packtory
   autoload :Command, File.expand_path('../packtory/command', __FILE__)
 
   autoload :Config, File.expand_path('../packtory/config', __FILE__)
+  autoload :Constants, File.expand_path('../packtory/constants', __FILE__)
 
   autoload :PatchBundlerNoMetadataDeps, File.expand_path('../packtory/patch_bundler_no_metadata_deps', __FILE__)
   autoload :FpmExec, File.expand_path('../packtory/fpm_exec', __FILE__)
