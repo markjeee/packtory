@@ -7,6 +7,12 @@ module Packtory
 
     def self.build_package(opts = { })
       packager = Packer.new(opts)
+
+      # add rubygems dependency
+      unless packager.opts[:dependencies].include?('rubygems')
+        packager.opts[:dependencies]['rubygems'] = nil
+      end
+
       fpm_exec = FpmExec.new(packager, INSTALL_PREFIX)
 
       sfiles_map = packager.prepare_files(INSTALL_PREFIX)
