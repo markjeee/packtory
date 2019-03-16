@@ -12,6 +12,8 @@ describe 'Install of generated package' do
     end
 
     it 'should install packtory' do
+      skip 'for now' if PacktorySpec.skip_if_only_one
+
       FileUtils.rm_f(@pkgout_file_path) if File.exists?(@pkgout_file_path)
       container = DockerTask.containers['packtory-spec.xenial']
 
@@ -24,7 +26,7 @@ describe 'Install of generated package' do
 
       dump_info = YAML.load(File.read(@pkgout_file_path))
       expect(dump_info[:version]).to eq(Packtory::VERSION)
-      expect(dump_info[:fpm_version]).to eq('1.10.2')
+      expect(dump_info[:fpm_version]).to eq(PacktorySpec.expected_fpm_version)
     end
   end
 
@@ -39,6 +41,8 @@ describe 'Install of generated package' do
     end
 
     it 'should install in Xenial' do
+      #skip 'for now' if PacktorySpec.skip_if_only_one
+
       FileUtils.rm_f(@pkgout_file_path) if File.exists?(@pkgout_file_path)
       container = DockerTask.containers['packtory-spec.xenial']
 
@@ -51,10 +55,12 @@ describe 'Install of generated package' do
 
       path, ver = File.read(@pkgout_file_path).split(/\n/, 3)
       expect(path).to eq('/usr/local/bin/fpm')
-      expect(ver).to eq('1.10.2')
+      expect(ver).to eq(PacktorySpec.expected_fpm_version)
     end
 
     it 'should install in Bionic' do
+      skip 'for now' if PacktorySpec.skip_if_only_one
+
       FileUtils.rm_f(@pkgout_file_path) if File.exists?(@pkgout_file_path)
       container = DockerTask.containers['packtory-spec.bionic']
 
@@ -67,10 +73,12 @@ describe 'Install of generated package' do
 
       path, ver = File.read(@pkgout_file_path).split(/\n/, 3)
       expect(path).to eq('/usr/local/bin/fpm')
-      expect(ver).to eq('1.10.2')
+      expect(ver).to eq(PacktorySpec.expected_fpm_version)
     end
 
     it 'should install in Jessie' do
+      skip 'for now' if PacktorySpec.skip_if_only_one
+
       FileUtils.rm_f(@pkgout_file_path) if File.exists?(@pkgout_file_path)
       container = DockerTask.containers['packtory-spec.jessie']
 
@@ -83,10 +91,12 @@ describe 'Install of generated package' do
 
       path, ver = File.read(@pkgout_file_path).split(/\n/, 3)
       expect(path).to eq('/usr/local/bin/fpm')
-      expect(ver).to eq('1.10.2')
+      expect(ver).to eq(PacktorySpec.expected_fpm_version)
     end
 
     it 'should install in Stretch' do
+      skip 'for now' if PacktorySpec.skip_if_only_one
+
       FileUtils.rm_f(@pkgout_file_path) if File.exists?(@pkgout_file_path)
       container = DockerTask.containers['packtory-spec.stretch']
 
@@ -99,7 +109,7 @@ describe 'Install of generated package' do
 
       path, ver = File.read(@pkgout_file_path).split(/\n/, 3)
       expect(path).to eq('/usr/local/bin/fpm')
-      expect(ver).to eq('1.10.2')
+      expect(ver).to eq(PacktorySpec.expected_fpm_version)
     end
   end
 end

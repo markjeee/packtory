@@ -47,6 +47,14 @@ module PacktorySpec
     SPEC_GEMS
   end
 
+  def self.expected_fpm_version
+    '1.11.0'
+  end
+
+  def self.skip_if_only_one
+    ENV['ONLY_ONE'] == '1'
+  end
+
   def self.spec_gems_path
     TMP_SPEC_GEMS
   end
